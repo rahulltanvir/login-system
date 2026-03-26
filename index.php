@@ -1,3 +1,12 @@
+<?php
+include("function.php");
+$loginObj= new loginsystem();
+
+
+?>
+
+
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
