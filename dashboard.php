@@ -1,3 +1,24 @@
+<?php
+session_start();
+
+// Check login
+if (!isset($_SESSION['user'])) {
+    header("Location: login.php");
+    exit;
+}
+
+// Session timeout (30 min)
+if (time() - $_SESSION['login_time'] > 1800) {
+    session_destroy();
+    header("Location: login.php");
+    exit;
+}
+?>
+
+<h2>Welcome <?php echo $_SESSION['user']; ?></h2>
+<a href="logout.php">Logout</a>
+
+
 <!DOCTYPE html>
 <html lang="en">
     <head>

@@ -22,6 +22,9 @@ if(isset($_POST['submit'])){
 
 // CSRF token generate
 $_SESSION['token'] = bin2hex(random_bytes(32));
+
+
+
 ?>
 
 
