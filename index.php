@@ -1,27 +1,5 @@
 <?php
-session_start();
-include("function.php");
 
-$loginObj = new loginsystem();
-
-if(isset($_POST['submit'])){
-
-    // CSRF check
-    if($_POST['token'] !== $_SESSION['token']){
-        die("Invalid Request");
-    }
-
-    $result = $loginObj->LoginData($_POST);
-
-    if($result === true){
-        header("Location: dashboard.php");
-    }else{
-        echo $result;
-    }
-}
-
-// CSRF token generate
-$_SESSION['token'] = bin2hex(random_bytes(32));
 
 
 

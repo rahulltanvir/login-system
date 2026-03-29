@@ -1,53 +1,76 @@
 <?php
-class LoginSystem {
+class loginSystem {
 
     private $conn;
-    
+
     public function __construct(){
         try{
-            $this->conn = mysqli_connect("localhost","root","","loginsystem");
+            $db_host="localhost";
+            $db_user="root";
+            $db_pass='';
+            $db_name="loginsystem";
+            $this->conn =mysqli_connect($db_host,$db_user,$db_pass,$db_name);
         }catch(mysqli_sql_exception $msg){
-            die("Database connection Error ".$msg->getMessage());
+            die("database connection Error!!". $msg->getMessage());
         }
     }
 
-    public function LoginData($data) {
+public function registration($data){
+        $email = strtolower(trim($data['email'])); // lowercase + trim
+        $password = $data['psw'];
+        $repassword = $data['psw-repeat'];
 
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
+        // 1️⃣ Validate email
+        if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
+            return "Invalid email format!";
         }
 
-        // Validate
-        $email = filter_var(trim($data['admin_email']), FILTER_VALIDATE_EMAIL);
-        $password = $data['admin_pass'];
-
-        if (!$email || empty($password)) {
-            return "Invalid Input";
+        // 2️⃣ Check password match
+        if($password !== $repassword){
+            return "Passwords do not match!";
         }
 
-        // Query
-        $stmt = $this->conn->prepare("SELECT * FROM admin_info WHERE ad_email = ?");
+        // 3️⃣ Check duplicate email in PHP first
+        $stmt = $this->conn->prepare("SELECT ad_id FROM admin_info WHERE ad_email = ?");
+        if(!$stmt) return "Database error: prepare failed";
+
         $stmt->bind_param("s", $email);
         $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt->store_result();
 
-        if ($result->num_rows === 1) {
-            $row = $result->fetch_assoc();
+        if($stmt->num_rows > 0){
+            $stmt->close();
+            return "Email already registered!";
+        }
+        $stmt->close();
 
-            if (password_verify($password, $row['ad_pass'])) {
+        // 4️⃣ Hash password
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-                session_regenerate_id(true);
+        // 5️⃣ Insert with try-catch to handle DB UNIQUE constraint
+        $stmt = $this->conn->prepare("INSERT INTO admin_info (ad_email, ad_pass) VALUES (?, ?)");
+        $stmt->bind_param("ss", $email, $hashedPassword);
 
-                $_SESSION['user'] = $row['ad_email'];
-                $_SESSION['login_time'] = time();
-
-                return true;
+        try {
+            $stmt->execute();
+            $stmt->close();
+            return true;
+        } catch(mysqli_sql_exception $e) {
+            $stmt->close();
+            // Duplicate key error code = 1062
+            if($e->getCode() == 1062){
+                return "Email already registered!";
+            } else {
+                return "Something went wrong: " . $e->getMessage();
             }
         }
+    }
 
-        return "Invalid Email or Password";
+    public function __destruct(){
+        $this->conn->close();
     }
 }
+
 
 
 ?>
