@@ -1,8 +1,37 @@
 <?php
+session_start(); // Must be first
 
+include("function.php");
+$adminLoginobj = new loginSystem();
 
+$error = "";
 
+// Generate CSRF token if not exists
+if(!isset($_SESSION['token'])){
+    $_SESSION['token'] = bin2hex(random_bytes(32));
+}
 
+// Redirect if already logged in
+if(isset($_SESSION['user_id'])){
+    header("Location: dashboard.php");
+    exit();
+}
+
+// Handle form submission
+if(isset($_POST['submit'])){
+    // CSRF check
+    if(!isset($_POST['token']) || $_POST['token'] !== $_SESSION['token']){
+        die("Invalid CSRF token");
+    }
+
+    $loginResult = $adminLoginobj->loginData($_POST);
+    if($loginResult === true){
+        header("Location: dashboard.php");
+        exit();
+    } else {
+        $error = $loginResult; // show error
+    }
+}
 ?>
 
 
@@ -28,7 +57,7 @@
     <input type="password" name="admin_pass" required><br>
 
     <!-- CSRF TOKEN -->
-    <input type="hidden" name="token" value="<?php echo $_SESSION['token']; ?>">
+    <input type="hidden" name="token" value="<?php if(isset($_SESSION))echo $_SESSION['token']; ?>">
 
     <button type="submit" name="submit">Login</button><br>
   </div>

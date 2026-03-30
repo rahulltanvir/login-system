@@ -65,6 +65,44 @@ public function registration($data){
             }
         }
     }
+    public function loginData($data){
+    $logEmail = strtolower(trim($data['admin_email']));
+    $logPasswd = $data['admin_pass'];
+
+    if(!filter_var($logEmail, FILTER_VALIDATE_EMAIL)){
+        return "Invalid Email Format";
+    }
+
+    $stmt = $this->conn->prepare("SELECT ad_id, ad_pass FROM admin_info WHERE ad_email = ?");
+    if(!$stmt){
+        return "Database error: prepare failed";
+    }
+
+    $stmt->bind_param("s", $logEmail);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if($result->num_rows === 0){
+        $stmt->close();
+        return "Email Not Found";
+    }
+
+    $user = $result->fetch_assoc();
+
+    if(password_verify($logPasswd, $user['ad_pass'])){
+        if(session_status() === PHP_SESSION_NONE){
+            session_start();
+        }
+        session_regenerate_id(true); // prevent session fixation
+        $_SESSION['user_id'] = $user['ad_id'];       // ✅ fixed
+        $_SESSION['user_email'] = $user['ad_email']; // ✅ fixed
+        $stmt->close();
+        return true; // let index.php handle redirect
+    } else {
+        $stmt->close();
+        return "Invalid Password";
+    }
+}
 
     public function __destruct(){
         $this->conn->close();
