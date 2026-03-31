@@ -73,7 +73,7 @@ public function registration($data){
         return "Invalid Email Format";
     }
 
-    $stmt = $this->conn->prepare("SELECT ad_id, ad_pass FROM admin_info WHERE ad_email = ?");
+    $stmt = $this->conn->prepare("SELECT ad_id, ad_email ,ad_pass FROM admin_info WHERE ad_email = ?");
     if(!$stmt){
         return "Database error: prepare failed";
     }
@@ -106,6 +106,13 @@ public function registration($data){
 
     public function __destruct(){
         $this->conn->close();
+    }
+
+    public function logOut(){
+         unset($_SESSION['user_id']);
+        unset($_SESSION['user_email']);
+        header("location: index.php");
+
     }
 }
 

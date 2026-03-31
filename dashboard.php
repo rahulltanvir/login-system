@@ -1,22 +1,34 @@
 <?php
+include("function.php");
+$adminLoginobj = new loginSystem();
 session_start();
 
 // Check login
-if (!isset($_SESSION['user'])) {
-    header("Location: login.php");
+if (!isset($_SESSION['user_id'])) {
+    header("Location: index.php");
     exit;
 }
 
 // Session timeout (30 min)
+if (!isset($_SESSION['login_time'])) {
+    $_SESSION['login_time'] = time();
+}
+
 if (time() - $_SESSION['login_time'] > 1800) {
+    session_unset();
     session_destroy();
-    header("Location: login.php");
+    header("Location: index.php");
     exit;
+}
+if(isset($_GET['adminLogout'])){
+    if($_GET['adminLogout']='logout'){
+        $adminLoginobj->logOut();
+    }
 }
 ?>
 
-<h2>Welcome <?php echo $_SESSION['user']; ?></h2>
-<a href="logout.php">Logout</a>
+<!-- <h2>Welcome <?php echo $_SESSION['user_id']; ?></h2>
+<a href="logout.php">Logout</a> -->
 
 
 <!DOCTYPE html>
@@ -54,7 +66,7 @@ if (time() - $_SESSION['login_time'] > 1800) {
                         <a class="dropdown-item" href="#">Settings</a>
                         <a class="dropdown-item" href="#">Activity Log</a>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="login.html">Logout</a>
+                        <a class="dropdown-item" href="?adminLogout=logout">Logout</a>
                     </div>
                 </li>
             </ul>

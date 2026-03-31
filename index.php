@@ -20,9 +20,9 @@ if(isset($_SESSION['user_id'])){
 // Handle form submission
 if(isset($_POST['submit'])){
     // CSRF check
-    if(!isset($_POST['token']) || $_POST['token'] !== $_SESSION['token']){
-        die("Invalid CSRF token");
-    }
+    // if(!isset($_POST['token']) || $_POST['token'] !== $_SESSION['token']){
+    //     die("Invalid CSRF token");
+    // }
 
     $loginResult = $adminLoginobj->loginData($_POST);
     if($loginResult === true){
