@@ -104,16 +104,18 @@ public function registration($data){
     }
 }
 
-    public function __destruct(){
-        $this->conn->close();
-    }
-
-    public function logOut(){
+public function logOut(){
          unset($_SESSION['user_id']);
         unset($_SESSION['user_email']);
         header("location: index.php");
 
     }
+    
+    public function __destruct(){
+        $this->conn->close();
+    }
+
+    
 }
 
 
